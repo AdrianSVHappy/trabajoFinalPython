@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h2>Bienvenido, {{ user.nombre }}</h2>
+    <a href="{{ url_for('profile') }}">Ver mi perfil</a>
+    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+
+    <h3>Crear Publicación</h3>
+    <form method="POST">
+        <textarea name="content" required></textarea><br>
+        <button type="submit">Publicar</button>
+    </form>
+
+    <h3>Publicaciones</h3>
+    {% for post in posts %}
+        <div>
+            <p><strong>{{ post.user.nombre }}:</strong> {{ post.texto }}</p>
+            <h4>Comentarios</h4>
+            {% for comment in post.comments %}
+                <p>{{ comment.texto }}</p>
+            {% endfor %}
+            <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
+                <input type="text" name="comment_text" placeholder="Escribe un comentario..." required>
+                <button type="submit">Comentar</button>
+            </form>
+        </div>
+    {% endfor %}
+</body>
+</html>
