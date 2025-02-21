@@ -6,7 +6,7 @@ from dbInit import Base, engine
 
 Base.metadata.create_all(engine)
 
-#Usuario.crear("Happy", "guay")
+#Usuario.crear("Happy", "guay", "guay", False)
 
 #Publicacion.crear("1", "Viva la vida")
 
@@ -15,5 +15,6 @@ Base.metadata.create_all(engine)
 #Seguidos.crear(2, 1)
 
 
-for i in Seguidos.listarSeguidores(2):
-    print (i);
+#for i in Seguidos.listarSeguidores(2):
+#    print (i);
+

@@ -19,7 +19,7 @@ def login():
         user = db_session.query(Usuario).filter_by(nombre=username).first()
 
         # Verificar la contraseña directamente sin hashing
-        if user and user.passw == password:  # Compara la contraseña directamente
+        if Usuario.comprobar(username,password):
             session["user_id"] = user.id
             session["username"] = user.nombre
             return redirect(url_for("home"))
@@ -28,7 +28,7 @@ def login():
 
     return render_template("login.html")
 
-# Ruta de registro
+# Ruta de registro (Registrer)
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -38,20 +38,30 @@ def register():
         bio = request.form.get("bio")
         photo = request.files.get("photo")
 
-        if password != confirm_password:
-            flash("Las contraseñas no coinciden", "error")
-            return redirect(url_for("register"))
+        img = True if photo and photo.filename != "" else False
+        mensaje = Usuario.crear(username, password, confirm_password, img, bio)
 
-      
 
-        # Guardar la imagen de perfil si se sube una
-        photo_filename = None
-        if photo and photo.filename != "":
-            photo_filename = f"{username}.jpg"
-            photo.save(os.path.join("static/images", photo_filename))
+        if mensaje != "OK":
+            flash(mensaje, "error_register")
+            return render_template("register.html")
 
-        Usuario.guardar(username, password, bio)  # Almacenar la contraseña directamente
-        flash("Registro exitoso. Inicia sesión.", "success")
+
+        # Obtener el usuario recién creado
+        user = db_session.query(Usuario).filter_by(nombre=username).first()
+        
+
+        # Guardar la imagen de perfil con el ID del usuario
+        default_image_path = os.path.join("static/images", "default.jpg")
+        user_image_path = os.path.join("static/images", f"{user.id}.jpg")
+
+        if img:
+            photo.save(user_image_path)
+        else:
+            with open(default_image_path, "rb") as default_img:
+                with open(user_image_path, "wb") as new_img:
+                    new_img.write(default_img.read())
+
         return redirect(url_for("login"))
 
     return render_template("register.html")
@@ -94,7 +104,7 @@ def edit_profile():
 
         photo = request.files.get("photo")
         if photo and photo.filename != "":
-            photo_filename = f"{user.nombre}.jpg"
+            photo_filename = f"{user.id}.jpg"
             photo.save(os.path.join("static/images", photo_filename))
 
         db_session.commit()

@@ -1,6 +1,8 @@
 from dbInit import Base, session, guardar
-from sqlalchemy import Column, Integer, VARCHAR, Text, LargeBinary, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, VARCHAR, Text, LargeBinary, ForeignKey
 from sqlalchemy.orm import relationship
+import hashlib
+import Publicacion
 
 class Usuario(Base):
     
@@ -10,7 +12,7 @@ class Usuario(Base):
     nombre = Column(VARCHAR(50), nullable=False)
     passw = Column(VARCHAR(255), nullable=False)
     bio = Column(Text)
-    foto = Column(LargeBinary)
+    foto = Column(Boolean)
     
     publicaciones = relationship("Publicacion", back_populates="user")
 
@@ -26,8 +28,8 @@ class Usuario(Base):
     """    
         
     @staticmethod
-    def guardar(nombre, passw, bio):
-        nuevo = Usuario(nombre=nombre, passw=passw, bio=bio)
+    def guardar(nombre, passw, bio, img):
+        nuevo = Usuario(nombre=nombre, passw=passw, bio=bio, foto=img)
         guardar(nuevo)
         
         
@@ -39,29 +41,61 @@ class Usuario(Base):
         if(p == ""):
             usuario = session.query(Usuario).filter_by(nombre=n).all()
         else:
-            usuario = session.query(Usuario).filter_by(nombre=n, passw = p).all()
+            usuario = session.query(Usuario).filter_by(nombre=n, passw = hashlib.sha256(p.encode()).hexdigest()).all()
          
         if usuario:
             ret = True
-        
+    
         return ret
             
     @staticmethod
-    def crear(nom, passw1, passw2, bio=None):
+    def crear(nom, passw1, passw2, foto, bio=None):
         mensaje = "OK"
+        segura = ""
         if (passw1 != passw2):
             mensaje = "Error: Las contraseñas no coinciden"
         elif(Usuario.comprobar(nom)):
             mensaje = "Error: El nombre de usuario está en uso"
         else:
-            Usuario.guardar(nom, passw1, bio)
-
+            segura = hashlib.sha256(passw1.encode())
+            Usuario.guardar(nom, segura.hexdigest(), bio, foto)
+        print(mensaje)
         return mensaje
     
     @staticmethod
-    def modificar(id):
+    def modificar(id, nombre="", bio="", foto=""):
+        user = session.query(Usuario).filter_by(id=id).first()
+        if nombre:
+            user.nombre = nombre
+            
+        if bio:
+            user.bio = bio
+            
+        if foto:
+            user.foto = foto
+            
+        session.commit()
+        
+    @staticmethod
+    def cambiarPass(id, antigua, nueva):
         user = session.query(Usuario).filter_by(id=id).first()
         
+        if hashlib.sha256(antigua.encode()).hexdigest() == user.passw:
+            user.passw = hashlib.sha256(nueva.encode()).hexdigest()
+            
+        session.commit()
+        
+    @staticmethod
+    def eliminar(id):
+
+        publicaciones = session.query(Publicacion).filter_by(id_usuario=id).all()
+  
+        for p in publicaciones:
+            Publicacion.eliminar(p.id)
+        
+        user = session.query(Usuario).filter_by(id=id).delete()
+        
+
 
 class Seguidos(Base):
  

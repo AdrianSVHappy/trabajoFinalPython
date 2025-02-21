@@ -6,8 +6,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h2>Perfil de {{ user.username }}</h2>
-    <img src="{{ url_for('get_profile_pic', user_id=user.id) }}" alt="Foto de perfil" width="100"><br>
+    <h2>Perfil de {{ user.nombre }}</h2>
+    
+    <!-- Si user.foto es True, mostrar su imagen, si no, usar default.jpg -->
+    {% if user.foto %}
+        <img src="{{ url_for('static', filename='images/' + (user.id|string) + '.jpg') }}" 
+             alt="Foto de perfil" width="100">
+    {% else %}
+        <img src="{{ url_for('static', filename='images/default.jpg') }}" 
+             alt="Foto de perfil" width="100">
+    {% endif %}
+
     <p>Biografía: {{ user.bio }}</p>
     <a href="{{ url_for('edit_profile') }}">Editar perfil</a>
     <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
