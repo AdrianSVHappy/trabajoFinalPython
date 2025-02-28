@@ -1,34 +1,85 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es">  <!-- Declara el tipo de documento HTML5 y especifica que el idioma es español -->
 <head>
-    <meta charset="UTF-8">
-    <title>Inicio</title>
+    <meta charset="UTF-8">  <!-- Define la codificación de caracteres como UTF-8 para admitir caracteres especiales -->
+    <title>Inicio</title>  <!-- Título de la página que se muestra en la pestaña del navegador -->
+
+    <!-- Enlace a la hoja de estilos CSS ubicada en la carpeta "static/css" -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h2>Bienvenido, {{ user.nombre }}</h2>
-    <a href="{{ url_for('profile') }}">Ver mi perfil</a>
-    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+    <div class="container">  <!-- Contenedor principal que envuelve todo el contenido de la página -->
+        
+        <!-- Cuadro de bienvenida y perfil -->
+        <div class="welcome-profile-box">
+            <h2>Bienvenido, {{ user.username }}</h2>  <!-- Muestra un mensaje de bienvenida con el nombre de usuario -->
+            <div class="profile-links">
+                <a href="{{ url_for('profile') }}">Ver mi perfil</a>  <!-- Enlace para ver el perfil del usuario -->
+                <a href="{{ url_for('logout') }}">Cerrar sesión</a>  <!-- Enlace para cerrar sesión -->
+            </div>
+        </div>
 
-    <h3>Crear Publicación</h3>
-    <form method="POST">
-        <textarea name="content" required></textarea><br>
-        <button type="submit">Publicar</button>
-    </form>
-
-    <h3>Publicaciones</h3>
-    {% for post in posts %}
-        <div>
-            <p><strong>{{ post.user.nombre }}:</strong> {{ post.texto }}</p>
-            <h4>Comentarios</h4>
-            {% for comment in post.comments %}
-                <p>{{ comment.texto }}</p>
-            {% endfor %}
-            <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
-                <input type="text" name="comment_text" placeholder="Escribe un comentario..." required>
-                <button type="submit">Comentar</button>
+        <!-- Espaciado entre el cuadro de perfil y el cuadro de búsqueda -->
+        <div class="search-box">
+            <form action="{{ url_for('buscar') }}" method="POST">  <!-- Formulario de búsqueda de usuarios -->
+                <input type="text" name="termino_busqueda" placeholder="Buscar usuario..." required>  <!-- Campo de entrada para buscar usuarios -->
+                <button type="submit">🔍</button>  <!-- Botón para enviar la búsqueda -->
             </form>
         </div>
-    {% endfor %}
+
+        <!-- Botón para ver las publicaciones de los usuarios seguidos -->
+        <div class="navigation-buttons">
+            <a href="{{ url_for('publicaciones_seguidos') }}">
+                <button>Ver publicaciones de los seguidos</button>  <!-- Botón que lleva a las publicaciones de los usuarios seguidos -->
+            </a>
+        </div>
+
+        <!-- Sección para crear una nueva publicación -->
+        <div class="create-post">
+            <h3>Crear Publicación</h3>  <!-- Título de la sección de creación de publicaciones -->
+            <form method="POST" class="form-container" enctype="multipart/form-data">  <!-- Formulario para crear la publicación -->
+                <textarea name="content" placeholder="Escribe tu publicación..." required></textarea><br>  <!-- Campo para escribir el contenido de la publicación -->
+                <input type="file" name="photo" accept="image/*">  <!-- Campo para subir una foto a la publicación -->
+                <button type="submit">Publicar</button>  <!-- Botón para publicar la publicación -->
+            </form>
+        </div>
+
+        <!-- Sección para mostrar las publicaciones del usuario -->
+        <div class="posts-section">
+            <h3>Mis publicaciones</h3>  <!-- Título de la sección de publicaciones del usuario -->
+            <div class="posts">
+                {% for post in posts %}  <!-- Itera sobre todas las publicaciones del usuario -->
+                    <div class="post">
+                        <p>
+                            <img src="{{ url_for('static', filename='images/' + (post.user.id|string) + '.jpg') if post.user.foto is true else url_for('static', filename='images/default.jpg') }}" 
+                                alt="Foto de perfil" class="profile-pic">  <!-- Muestra la foto de perfil del usuario, o una por defecto -->
+                            <strong>{{ post.user.nombre }}:</strong> {{ post.texto }}  <!-- Muestra el nombre del usuario y el texto de la publicación -->
+                        </p>
+
+                        {% if post.computed_foto_path %}  <!-- Si la publicación tiene una foto asociada -->
+                            <img src="{{ url_for('static', filename='publicaciones/' + post.computed_foto_path) }}" alt="Foto de la publicación" class="post-image">  <!-- Muestra la foto de la publicación -->
+                        {% else %}
+                            <p><em>No se ha añadido ninguna foto a la publicación.</em></p>  <!-- Mensaje si la publicación no tiene foto -->
+                        {% endif %}
+
+                        <h4>Comentarios</h4>  <!-- Título para la sección de comentarios -->
+                        {% for comment in post.comments %}  <!-- Itera sobre todos los comentarios de la publicación -->
+                            <p>
+                                <img src="{{ url_for('static', filename='images/' + (comment.user.id|string) + '.jpg') if comment.user.foto is true else url_for('static', filename='images/default.jpg') }}" 
+                                    alt="Foto de perfil" class="comment-pic">  <!-- Muestra la foto de perfil del usuario que hizo el comentario -->
+                                <strong>{{ comment.user.nombre }}:</strong> {{ comment.texto }}  <!-- Muestra el nombre del usuario y el texto del comentario -->
+                            </p>
+                        {% endfor %}
+
+                        <!-- Formulario para agregar un nuevo comentario -->
+                        <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}" class="comment-form">
+                            <input type="text" name="comment_text" placeholder="Escribe un comentario..." required>  <!-- Campo de texto para escribir un comentario -->
+                            <button type="submit">Comentar</button>  <!-- Botón para enviar el comentario -->
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </body>
 </html>

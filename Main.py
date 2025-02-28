@@ -18,3 +18,4 @@ Base.metadata.create_all(engine)
 #for i in Seguidos.listarSeguidores(2):
 #    print (i);
 
+#Publicacion.eliminar(7)

@@ -1,35 +1,46 @@
 <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>Registro</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    </head>
-    <body>
-        <h2>Registro</h2>
-        <form method="POST" enctype="multipart/form-data">
-            <label>Usuario:</label>
-            <input type="text" name="username" required><br>
-            <label>Contraseña:</label>
-            <input type="password" name="password" required><br>
-            <label>Repetir Contraseña:</label>
-            <input type="password" name="confirm_password" required><br>
-            <label>Foto de Perfil:</label>
-            <input type="file" name="photo"><br>
-            <label>Biografía:</label>
-            <textarea name="bio"></textarea><br>
-            <button type="submit">Registrarse</button>
+<html lang="es">  <!-- Declara el tipo de documento y especifica que el idioma es español -->
+<head>
+    <meta charset="UTF-8">  <!-- Define la codificación de caracteres como UTF-8 para permitir caracteres especiales -->
+    <title>Registro</title>  <!-- Título de la página que aparece en la pestaña del navegador -->
+
+    <!-- Enlace a la hoja de estilos CSS ubicada en la carpeta "static/css" -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">  <!-- Contenedor principal para la estructura de la página -->
+        <h2>Registro</h2>  <!-- Título principal que indica que es la página de registro -->
+        
+        <!-- Formulario para el registro de usuario -->
+        <form method="POST" enctype="multipart/form-data" class="form-container">
+            <label>Usuario:</label>  <!-- Etiqueta para el campo de nombre de usuario -->
+            <input type="text" name="username" required>  <!-- Campo para ingresar el nombre de usuario, es obligatorio -->
+
+            <label>Contraseña:</label>  <!-- Etiqueta para el campo de contraseña -->
+            <input type="password" name="password" required>  <!-- Campo para ingresar la contraseña, es obligatorio -->
+
+            <label>Repetir Contraseña:</label>  <!-- Etiqueta para el campo de confirmación de la contraseña -->
+            <input type="password" name="confirm_password" required>  <!-- Campo para repetir la contraseña, es obligatorio -->
+
+            <label>Foto de Perfil:</label>  <!-- Etiqueta para el campo de carga de foto de perfil -->
+            <input type="file" name="photo">  <!-- Campo para cargar una imagen de perfil, es opcional -->
+
+            <label>Biografía:</label>  <!-- Etiqueta para el campo de biografía -->
+            <textarea name="bio"></textarea>  <!-- Área de texto para la biografía del usuario, es opcional -->
+
+            <button type="submit">Registrarse</button>  <!-- Botón para enviar el formulario y completar el registro -->
         </form>
-    
+
+        <!-- Bloque para mostrar mensajes flash, como errores de registro -->
         {% with messages = get_flashed_messages(with_categories=True) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    {% if category == "error_register" %}
-                        <div class="flash-message error">{{ message }}</div>
+            {% if messages %}  <!-- Comprueba si hay mensajes flash -->
+                {% for category, message in messages %}  <!-- Itera sobre los mensajes flash -->
+                    {% if category == "error_register" %}  <!-- Si el mensaje pertenece a la categoría de error de registro -->
+                        <div class="flash-message error">{{ message }}</div>  <!-- Muestra el mensaje de error en una caja de estilo 'error' -->
                     {% endif %}
                 {% endfor %}
             {% endif %}
         {% endwith %}
-    </body>
-    </html>
-    
+    </div>
+</body>
+</html>

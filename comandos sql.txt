@@ -1,0 +1,28 @@
+Entrar por terminal:
+mysql -u pyuser -p pytest
+
+ver nombres de las tablas:
+show tables;
+
+Eliminar tabla:
+drop table tabla;
+
+Eliminar la base de datos: (Recuerda borrar las fotos de la carpetas, que tienen el id de los usuarios borrados, y va a dar fallo)
+drop database pytest;
+
+Crear la base de datos:
+create database pytest;
+
+Acceder a la base de datos:
+use pytest;
+
+
+NOTAS:  
+He modificado el metodo que muestra las publicaciones, sua el metodo de mostrarUs dentro de publicaciones
+Intenta usar las relaciones que he hecho, si necesitas un metodo que devuelva algo dimelo y lo creo
+Voy a comentar todas mis clases, tengo que pensar en los megusta, creo que al final haré una tabla como los seguidores
+Para mostar los seguidores y seguidos he creado dos metodos en la calse Seguidos que debería mostarlos, yo he hecho algunas pruebas pero tu las haces con muchos usuarios
+a lo mejor tu ves algo que yo no
+He dejado el programa para que se pueda ejecutar desde el proxmox
+He Borrado y creado la base de datos, así que solo está mi usuario y no se si alguna publicación
+Al editar mi usuario he visto que no tengo forma de marcar que no quiero tener foto de perfil, no se si es por el error de las imagenes o no se

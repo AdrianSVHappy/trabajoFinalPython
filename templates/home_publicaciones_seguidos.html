@@ -1,0 +1,73 @@
+<!DOCTYPE html>  <!-- Declara el tipo de documento como HTML5 -->
+<html lang="es">  <!-- Define el idioma del contenido como español -->
+<head>
+    <meta charset="UTF-8">  <!-- Configura la codificación de caracteres como UTF-8 para soportar caracteres especiales -->
+    <title>Publicaciones de los que sigo</title>  <!-- Título de la página, visible en la pestaña del navegador -->
+
+    <!-- Enlace a la hoja de estilos CSS ubicada en la carpeta "static/css" -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">  <!-- Contenedor principal para organizar la estructura de la página -->
+        
+        <h2>Bienvenido, {{ user.username }}</h2>  <!-- Muestra un saludo con el nombre de usuario actual -->
+
+        <!-- Sección con enlaces para acceder al perfil o cerrar sesión -->
+        <div class="profile-links">
+            <a href="{{ url_for('profile') }}">Ver mi perfil</a>  <!-- Enlace a la página de perfil del usuario -->
+            <a href="{{ url_for('logout') }}">Cerrar sesión</a>  <!-- Enlace para cerrar sesión -->
+        </div>
+
+        <!-- Sección de búsqueda de usuarios -->
+        <div class="search-box">
+            <form action="{{ url_for('buscar') }}" method="POST">  <!-- Formulario para buscar usuarios, envía datos por método POST -->
+                <input type="text" name="termino_busqueda" placeholder="Buscar usuario..." required>  <!-- Campo de entrada para el término de búsqueda -->
+                <button type="submit">🔍</button>  <!-- Botón de envío con icono de lupa -->
+            </form>
+        </div>
+
+        <!-- Sección de publicaciones de las personas que sigue el usuario -->
+        <div class="posts-section">
+            <h3>Publicaciones de las personas que sigo</h3>  <!-- Encabezado de la sección -->
+
+            <div class="posts">  <!-- Contenedor para todas las publicaciones -->
+                {% for post in posts_seguidos %}  <!-- Bucle que recorre las publicaciones de los usuarios seguidos -->
+                    <div class="post">  <!-- Contenedor de una publicación individual -->
+                        <p>
+                            <!-- Muestra la foto de perfil del usuario que hizo la publicación -->
+                            <img src="{{ url_for('static', filename='images/' + (post.user.id|string) + '.jpg') if post.user.foto is true else url_for('static', filename='images/default.jpg') }}" 
+                                alt="Foto de perfil" class="profile-pic">
+                            <strong>{{ post.user.nombre }}:</strong> {{ post.texto }}  <!-- Muestra el nombre del usuario y el contenido de la publicación -->
+                        </p>
+
+                        {% if post.computed_foto_path %}  <!-- Verifica si la publicación tiene una imagen adjunta -->
+                            <!-- Muestra la imagen de la publicación -->
+                            <img src="{{ url_for('static', filename='publicaciones/' + post.computed_foto_path) }}" 
+                                alt="Foto de la publicación" class="post-image">
+                        {% else %}
+                            <p><em>No se ha añadido ninguna foto a la publicación.</em></p>  <!-- Mensaje si no hay imagen en la publicación -->
+                        {% endif %}
+
+                        <h4>Comentarios</h4>  <!-- Encabezado para la sección de comentarios -->
+
+                        {% for comment in post.comments %}  <!-- Bucle que recorre los comentarios de la publicación -->
+                        <p>
+                            <!-- Muestra la foto de perfil del usuario que hizo el comentario -->
+                            <img src="{{ url_for('static', filename='images/' + (comment.user.id|string) + '.jpg') if comment.user.foto is true else url_for('static', filename='images/default.jpg') }}" 
+                                alt="Foto de perfil" class="comment-pic">
+                            <strong>{{ comment.user.nombre }}:</strong> {{ comment.texto }}  <!-- Muestra el nombre del usuario y el contenido del comentario -->
+                        </p>
+                        {% endfor %}  <!-- Fin del bucle de comentarios -->
+
+                        <!-- Formulario para añadir un nuevo comentario a la publicación -->
+                        <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}" class="comment-form">
+                            <input type="text" name="comment_text" placeholder="Escribe un comentario..." required>  <!-- Campo de entrada del comentario -->
+                            <button type="submit">Comentar</button>  <!-- Botón para enviar el comentario -->
+                        </form>
+                    </div>  <!-- Fin de una publicación -->
+                {% endfor %}  <!-- Fin del bucle de publicaciones -->
+            </div>  <!-- Fin del contenedor de publicaciones -->
+        </div>  <!-- Fin de la sección de publicaciones -->
+    </div>  <!-- Fin del contenedor principal -->
+</body>
+</html>  <!-- Fin del documento HTML -->

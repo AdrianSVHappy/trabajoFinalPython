@@ -1,31 +1,69 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es">  <!-- Declara el tipo de documento y especifica que el idioma es español -->
 <head>
-    <meta charset="UTF-8">
-    <title>Perfil</title>
+    <meta charset="UTF-8">  <!-- Define la codificación de caracteres como UTF-8 para admitir caracteres especiales -->
+    <title>Perfil</title>  <!-- Título de la página que aparece en la pestaña del navegador -->
+
+    <!-- Enlace a la hoja de estilos CSS ubicada en la carpeta "static/css" -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h2>Perfil de {{ user.nombre }}</h2>
-    
-    <!-- Si user.foto es True, mostrar su imagen, si no, usar default.jpg -->
-    {% if user.foto %}
-        <img src="{{ url_for('static', filename='images/' + (user.id|string) + '.jpg') }}" 
-             alt="Foto de perfil" width="100">
-    {% else %}
-        <img src="{{ url_for('static', filename='images/default.jpg') }}" 
-             alt="Foto de perfil" width="100">
-    {% endif %}
-
-    <p>Biografía: {{ user.bio }}</p>
-    <a href="{{ url_for('edit_profile') }}">Editar perfil</a>
-    <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
-
-    <h3>Mis Publicaciones</h3>
-    {% for post in posts %}
-        <div>
-            <p>{{ post.texto }}</p>
+    <div class="container">  <!-- Contenedor principal que envuelve todo el contenido de la página -->
+        <h2>Perfil de {{ user.nombre }}</h2>  <!-- Título que muestra el nombre del usuario que está viendo su perfil -->
+        
+        <!-- Sección de Foto y Seguidores/Seguidos -->
+        <div class="profile-header">
+            <!-- Foto de perfil, si el usuario tiene foto se muestra, si no, se usa una foto predeterminada -->
+            <img src="{{ url_for('static', filename='images/' + (user.id|string) + '.jpg') if user.foto else url_for('static', filename='images/default.jpg') }}" 
+                 alt="Foto de perfil" class="profile-img">  <!-- Foto de perfil -->
+            
+            <div class="profile-info">
+                <div class="stats">
+                    <!-- Información de estadísticas del perfil: seguidores y seguidos -->
+                    <div class="stat">
+                        <p>Seguidores</p>  <!-- Muestra la etiqueta "Seguidores" -->
+                        <p>{{ seguidores_count }}</p>  <!-- Muestra la cantidad de seguidores -->
+                    </div>
+                    <div class="stat">
+                        <p>Seguidos</p>  <!-- Muestra la etiqueta "Seguidos" -->
+                        <p>{{ seguidos_count }}</p>  <!-- Muestra la cantidad de personas que el usuario sigue -->
+                    </div>
+                </div>
+            </div>
         </div>
-    {% endfor %}
+
+        <!-- Muestra la biografía del usuario -->
+        <p>Biografía: {{ user.bio }}</p>  <!-- Biografía del usuario -->
+
+        <div class="profile-links">
+            <!-- Enlaces para editar el perfil o cerrar sesión -->
+            <a href="{{ url_for('edit_profile') }}">Editar perfil</a>  <!-- Enlace para editar el perfil -->
+            <a href="{{ url_for('logout') }}">Cerrar Sesión</a>  <!-- Enlace para cerrar sesión -->
+        </div>
+
+        <!-- Separar Mis publicaciones -->
+        <div class="my-posts">
+            <h3>Mis Publicaciones</h3>  <!-- Título de la sección de publicaciones del usuario -->
+            <div class="posts">
+                {% for post in posts %}  <!-- Itera sobre las publicaciones del usuario -->
+                    <div class="post">
+                        <p><strong>Publicación</strong></p>  <!-- Título que dice "Publicación" -->
+                        <p>{{ post.texto }}</p>  <!-- Muestra el contenido del texto de la publicación -->
+        
+                        <!-- Formulario para eliminar la publicación -->
+                        <form action="{{ url_for('delete_post', post_id=post.id) }}" method="post" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta publicación?');">
+                            <!-- El botón de eliminar, que solicita confirmación antes de enviar el formulario -->
+                            <button type="submit" class="delete-btn">Eliminar</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Agregar enlace para volver a la página principal o a las publicaciones -->
+        <div class="back-to-posts">
+            <a href="{{ url_for('home') }}">Volver a Publicaciones</a>  <!-- Enlace para volver a la página de publicaciones -->
+        </div>
+    </div>
 </body>
 </html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>  <!-- Declara el tipo de documento como HTML5 -->
+<html lang="es">  <!-- Especifica que el idioma de la página es español -->
+<head>
+  <meta charset="UTF-8">  <!-- Define la codificación de caracteres como UTF-8 para admitir caracteres especiales -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- Hace que el diseño sea responsivo, adaptándose a dispositivos móviles -->
+  <title>Buscar Usuarios</title>  <!-- Título de la página web, que aparece en la pestaña del navegador -->
+
+  <!-- Enlace a la hoja de estilos CSS, que se encuentra en la carpeta "static/css" -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <div class="container">  <!-- Contenedor principal de la página, que organiza y contiene todo el contenido -->
+    <h1 class="app-title">Buscar Usuarios</h1>  <!-- Título principal de la aplicación -->
+
+    <!-- Formulario de búsqueda de usuarios -->
+    <form action="{{ url_for('buscar') }}" method="POST" class="form-container">  <!-- El formulario envía datos por el método POST al endpoint 'buscar' -->
+      <input type="text" name="termino_busqueda" placeholder="Buscar usuario..." required>  <!-- Campo de texto para introducir el término de búsqueda -->
+      <button type="submit" class="btn btn-primary">Buscar</button>  <!-- Botón para enviar el formulario -->
+    </form>
+
+    {% if resultados %}  <!-- Verifica si hay resultados para mostrar -->
+      <h2>Resultados de búsqueda:</h2>  <!-- Encabezado para mostrar los resultados de la búsqueda -->
+      <ul class="user-list">  <!-- Lista que contiene los usuarios encontrados -->
+        {% for usuario in resultados %}  <!-- Itera sobre cada usuario en la lista de resultados -->
+          <li class="post">  <!-- Contenedor de cada usuario dentro de la lista -->
+            <div class="user-info">  <!-- Contenedor de la información del usuario -->
+              <strong>{{ usuario.nombre }}</strong>  <!-- Muestra el nombre del usuario -->
+              <p>{{ usuario.bio or "Sin biografía" }}</p>  <!-- Muestra la biografía del usuario o un mensaje alternativo si no tiene biografía -->
+            </div>
+
+            <!-- Verificar si el usuario ya está siendo seguido -->
+            {% if usuario.id in seguidos_ids %}  
+              <!-- Si el usuario está en la lista de seguidos, muestra un botón para dejar de seguir -->
+              <form action="{{ url_for('dejar_de_seguir', usuario_id=usuario.id) }}" method="POST">
+                <button type="submit" class="btn btn-danger">Dejar de seguir</button>  <!-- Botón para dejar de seguir -->
+              </form>
+            {% else %}
+              <!-- Si el usuario no está siendo seguido, muestra un botón para seguir -->
+              <form action="{{ url_for('seguir_usuario', user_id=usuario.id) }}" method="POST">
+                <button type="submit" class="btn btn-secondary">Seguir</button>  <!-- Botón para seguir al usuario -->
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <!-- Si no hay resultados, muestra un mensaje indicando que no se encontraron usuarios -->
+      <p class="no-results">No se encontraron usuarios que coincidan con tu búsqueda.</p>
+    {% endif %}
+
+    <!-- Formulario para volver a la página principal -->
+    <form action="{{ url_for('home') }}" method="GET">  <!-- El formulario envía una petición GET al endpoint 'home' -->
+      <button type="submit" class="btn btn-secondary">Volver a la página principal</button>  <!-- Botón para volver a la página principal -->
+    </form>
+
+  </div>  <!-- Fin del contenedor principal -->
+</body>
+</html>  <!-- Fin del documento HTML -->
