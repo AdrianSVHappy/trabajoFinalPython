@@ -1,4 +1,4 @@
-from dbInit import Base, guardar, session
+from dbInit import Base, guardar, actualizar, session
 from sqlalchemy import Column, Integer, Text, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -18,7 +18,6 @@ class Comentario(Base):
     id_us = Column(Integer, ForeignKey("usuarios.id", ondelete='CASCADE'), nullable=False)
     id_pub = Column(Integer, ForeignKey("publicaciones.id", ondelete='CASCADE'), nullable=False)
     texto = Column(Text)
-    
 
     user = relationship("Usuario", back_populates="comentarios")
     
@@ -45,7 +44,7 @@ class Comentario(Base):
         if texto:
             com.text = com
             
-        session.commit()
+        actualizar()
 
     """
     Metodo estatico que elimina un comentario
@@ -54,4 +53,4 @@ class Comentario(Base):
     @staticmethod
     def eliminar(id):
         session.query(Comentario).filterby(id=id).delete()
-        session.commit
+        actualizar()

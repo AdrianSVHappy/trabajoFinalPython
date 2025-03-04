@@ -1,9 +1,8 @@
-from dbInit import Base, guardar, session
+from dbInit import Base, guardar, actualizar, session
 from sqlalchemy import Column, Integer, Text, Boolean, DateTime, ForeignKey
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from Comentario import Comentario
-import os
 
 """
 Clase que representa una publicación
@@ -33,13 +32,13 @@ class Publicacion(Base):
     """
     @staticmethod
     def crear(idU, texto, foto_filename=None):
-        like = 0
+        
         fecha = datetime.today()
 
         # Se marca la publicación como True si se pasó un nombre de archivo, sino False
         foto = True if foto_filename else False
 
-        nuevo = Publicacion(id_usuario=idU, fecha=fecha, texto=texto, like=like, foto=foto)
+        nuevo = Publicacion(id_usuario=idU, fecha=fecha, texto=texto, foto=foto)
         guardar(nuevo)
 
         
@@ -56,7 +55,7 @@ class Publicacion(Base):
         if texto:
             pub.texto = texto
             
-        session.commit()
+        actualizar()
     
     """
     Metodo que devuelve una lista con las publicaciones de un usuario en especifico o de todos
@@ -87,7 +86,7 @@ class Publicacion(Base):
     @staticmethod
     def eliminar(id):
         session.query(Publicacion).filter_by(id=id).delete()
-        session.commit()
+        actualizar()
         
         
 

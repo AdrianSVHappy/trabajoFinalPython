@@ -1,5 +1,5 @@
-from dbInit import Base, session, guardar
-from sqlalchemy import Boolean, Column, Integer, VARCHAR, Text, LargeBinary, ForeignKey
+from dbInit import Base, session, guardar, actualizar
+from sqlalchemy import Boolean, Column, Integer, VARCHAR, Text, ForeignKey
 from sqlalchemy.orm import relationship
 import hashlib
 from Pubicacion import Publicacion
@@ -102,7 +102,7 @@ class Usuario(Base):
         else:  # Si hay una foto válida, mantener True
             user.foto = True
             
-        session.commit()
+        actualizar()
         
     """
     Metodo estatico para cambiar la contraseña de un usuario
@@ -117,7 +117,7 @@ class Usuario(Base):
         if hashlib.sha256(antigua.encode()).hexdigest() == user.passw:
             user.passw = hashlib.sha256(nueva.encode()).hexdigest()
             
-        session.commit()
+        actualizar()
         
     """
     Metodo estatico para eliminar un usuario
@@ -126,7 +126,7 @@ class Usuario(Base):
     @staticmethod
     def eliminar(id):
         session.query(Usuario).filter_by(id=id).delete()
-        session.commit()
+        actualizar()
     
     """
     Metodo de clase para buscar un usuario por su nombre
@@ -215,8 +215,7 @@ class Seguidos(Base):
     def seguir(cls, id_seguidor, id_usuario):
         if not cls.es_seguidor(id_seguidor, id_usuario):
             nuevo_seguimiento = cls(id_seguidor=id_seguidor, id_usuario=id_usuario)
-            session.add(nuevo_seguimiento)
-            session.commit()
+            guardar(nuevo_seguimiento)
 
     """
     Metodo de clase para dejar de seguir a un usuario
@@ -228,4 +227,4 @@ class Seguidos(Base):
         seguimiento = session.query(cls).filter_by(id_seguidor=id_seguidor, id_usuario=id_usuario).first()
         if seguimiento:
             session.delete(seguimiento)
-            session.commit()
+            actualizar()
