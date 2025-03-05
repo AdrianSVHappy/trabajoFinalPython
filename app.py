@@ -229,16 +229,23 @@ def buscar():
         return redirect(url_for("login"))
 
     resultados = []  # Lista donde se almacenarán los resultados de la búsqueda
+    usuario_actual_id = flask_session["user_id"]  # ID del usuario actual
+
     if request.method == "POST":  # Si la petición es POST (cuando se envía el formulario de búsqueda)
         termino_busqueda = request.form["termino_busqueda"]  # Obtenemos el término de búsqueda del formulario
-        # Realizamos la búsqueda en la base de datos de usuarios cuyo nombre coincida con el término
-        resultados = db_session.query(Usuario).filter(Usuario.nombre.ilike(f"%{termino_busqueda}%")).all()
+        # Realizamos la búsqueda excluyendo al usuario actual
+        resultados = (
+            db_session.query(Usuario)
+            .filter(Usuario.nombre.ilike(f"%{termino_busqueda}%"), Usuario.id != usuario_actual_id)
+            .all()
+        )
 
     # Obtenemos los IDs de los usuarios que ya está siguiendo el usuario actual
-    seguidos = db_session.query(Seguidos).filter_by(id_seguidor=flask_session["user_id"]).all()  # Buscamos los seguidos
+    seguidos = db_session.query(Seguidos).filter_by(id_seguidor=usuario_actual_id).all()  # Buscamos los seguidos
     seguidos_ids = [seguidor.id_usuario for seguidor in seguidos]  # Extraemos los IDs de los usuarios seguidos
 
     return render_template("buscar.html", resultados=resultados, seguidos_ids=seguidos_ids)
+
 
 # Ruta para seguir un usuario
 @app.route("/seguir_usuario/<int:user_id>", methods=["POST"])
@@ -318,6 +325,66 @@ def publicaciones_seguidos():
 
     return render_template('home_publicaciones_seguidos.html', user=flask_session, posts_seguidos=publicaciones_seguidos)  # Mostramos las publicaciones
 
+# Ruta para mostrar los seguidores de un usuario
+@app.route("/seguidores/<int:user_id>")
+def seguidores(user_id):
+    # Verificar si el usuario está autenticado (existe en la sesión)
+    if "user_id" not in flask_session:
+        # Si no está autenticado, redirigir al login
+        return redirect(url_for("login"))
+    
+    # Obtener el usuario actual desde la base de datos usando el ID del usuario proporcionado en la URL
+    user = db_session.query(Usuario).filter_by(id=user_id).first()
+    # Si no se encuentra el usuario, redirigir al login
+    if not user:
+        return redirect(url_for("login"))
+    
+    # Obtener la lista de seguidores del usuario desde el modelo 'Seguidos'
+    seguidores = Seguidos.listarSeguidores(user_id)
+    
+    # Crear una lista para almacenar los nombres de los seguidores
+    seguidores_list = []
+    for seguidor in seguidores:
+        # Buscar el usuario que es seguidor (por su ID)
+        usuario = db_session.query(Usuario).filter_by(id=seguidor.id_seguidor).first()
+        if usuario:
+            # Agregar el nombre del seguidor a la lista
+            seguidores_list.append(usuario.nombre)
+    
+    # Pasar la lista de seguidores y el usuario actual a la plantilla 'seguidores.html'
+    return render_template("seguidores.html", seguidores=seguidores_list, user=user)
+
+
+# Ruta para mostrar los seguidos de un usuario
+@app.route("/seguidos/<int:user_id>")
+def seguidos(user_id):
+    # Verificar si el usuario está autenticado (existe en la sesión)
+    if "user_id" not in flask_session:
+        # Si no está autenticado, redirigir al login
+        return redirect(url_for("login"))
+    
+    # Obtener el usuario actual desde la base de datos usando el ID del usuario proporcionado en la URL
+    user = db_session.query(Usuario).filter_by(id=user_id).first()
+    # Si no se encuentra el usuario, redirigir al login
+    if not user:
+        return redirect(url_for("login"))
+    
+    # Obtener la lista de personas que el usuario está siguiendo desde la base de datos (modelo 'Seguidos')
+    seguidos = db_session.query(Seguidos).filter_by(id_seguidor=user_id).all()  # Filtrar por el ID del seguidor
+    
+    # Crear una lista para almacenar los nombres de los usuarios seguidos
+    seguidos_list = []
+    for seguido in seguidos:
+        # Buscar el usuario que está siendo seguido (por su ID)
+        usuario = db_session.query(Usuario).filter_by(id=seguido.id_usuario).first()  # Usar el ID del usuario seguido
+        if usuario:
+            # Agregar el nombre del usuario seguido a la lista
+            seguidos_list.append(usuario.nombre)
+    
+    # Pasar la lista de seguidos y el usuario actual a la plantilla 'seguidos.html'
+    return render_template("seguidos.html", seguidos=seguidos_list, user=user)
+
+
 # Ruta para cerrar sesión
 @app.route("/logout")
 def logout():
@@ -326,3 +393,4 @@ def logout():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
+    
